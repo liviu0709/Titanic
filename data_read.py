@@ -1,8 +1,12 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import math
+import re
 
 data = pd.read_csv("train.csv") # index_col="PassengerId"
+
+male_titles = ['Mr', 'Don', 'Rev', 'Sir', 'Count']
+female_titles = ['Mrs', 'Miss', 'Ms', 'Lady', 'Mlle', 'Countess', 'Dona']
 
 # print various info
 # ------------------
@@ -112,3 +116,21 @@ data = pd.read_csv("train.csv") # index_col="PassengerId"
 # plt.ylabel("Number of surviving males")
 # plt.xlabel("Age group")
 # plt.show()
+
+# it's time to be homophobic
+# --------------------------
+titles = {}
+for name in data['Name']:
+    temp = re.findall(" [a-zA-Z]+\. ", name)
+    if temp[0].strip(' .') not in titles.keys() and temp[0].strip(' .') in male_titles:
+        temp_data = data[(data['Sex'] == 'male')]
+        # print("temp stip:", temp[0].strip(' '))
+        titles[temp[0].strip(' ')] = temp_data['Name'].str.contains(temp[0]).sum()
+    else:
+        if temp[0].strip(' .') not in titles.keys() and temp[0].strip(' .') in female_titles:
+            temp_data = data[(data['Sex'] == 'female')]
+            titles[temp[0].strip(' ')] = temp_data['Name'].str.contains(temp[0]).sum()
+        else:
+            titles[temp[0].strip(' ')] = data['Name'].str.contains(temp[0]).sum()
+plt.plot(titles.keys(), titles.values())
+plt.show()
