@@ -1,5 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import math
 
 data = pd.read_csv("train.csv") # index_col="PassengerId"
 
@@ -52,20 +53,62 @@ data = pd.read_csv("train.csv") # index_col="PassengerId"
 
 # NaN elements for every col
 # --------------------------
-nulls = data.isnull().sum(axis=0)
-# survive_count = data["Survived"].value_counts()
-for header in nulls.keys():
-    if nulls[header] != 0:
-        prop = (nulls[header]*100)/len(data[header])
-        print(header, "column has", nulls[header], "null values, which equals to", prop, "% of values.")
-print()
-for i in [0, 1]:
-    split_dataset=data[(data["Survived"] == i)]
-    nulls = split_dataset.isnull().sum(axis=0)
-    for header in nulls.keys():
-        if nulls[header] != 0:
-            prop = (nulls[header]*100)/len(split_dataset[header])
-            if i:
-                print("Survivors'", header, "column has", nulls[header], "null values, which equals to", prop, "% of values.")
-            else:
-                print("Deceased's", header, "column has", nulls[header], "null values, which equals to", prop, "% of values.")
+# nulls = data.isnull().sum(axis=0)
+# for header in nulls.keys():
+#     if nulls[header] != 0:
+#         prop = (nulls[header]*100)/len(data[header])
+#         print(header, "column has", nulls[header], "null values, which equals to", prop, "% of values.")
+# print()
+# for i in [0, 1]:
+#     split_dataset=data[(data["Survived"] == i)]
+#     nulls = split_dataset.isnull().sum(axis=0)
+#     for header in nulls.keys():
+#         if nulls[header] != 0:
+#             prop = (nulls[header]*100)/len(split_dataset[header])
+#             if i:
+#                 print("Survivors'", header, "column has", nulls[header], "null values, which equals to", prop, "% of values.")
+#             else:
+#                 print("Deceased's", header, "column has", nulls[header], "null values, which equals to", prop, "% of values.")
+# print()
+                
+# splitting the dataset between children and adults
+# -------------------------------------------------
+# children_data = data[(data['Age'] < 18)]
+# adult_data = data[(data['Age'] > 18)]
+
+# children_perc = len(children_data)/len(data)*100
+# adult_perc = len(adult_data)/len(data)*100
+
+# children_sv = ((children_data['Survived'].value_counts()/children_data['Survived'].count())*100)
+# adult_sv = ((adult_data['Survived'].value_counts()/adult_data['Survived'].count())*100)
+
+# legend = {}
+# legend['Children'] = children_sv[1]
+# legend['Adults'] = adult_sv[1]
+
+# plt.bar(legend.keys(), legend.values())
+# plt.ylabel("Survival Rate")
+# plt.show()
+
+# print("Percentage of children passengers:", children_perc)
+# print("Percentage of adult passengers:", adult_perc)
+
+# splitting the dataset between age groups
+# ----------------------------------------
+# data['AgeGroup'] = data['Age'].apply(lambda x: x if math.isnan(x) else int(max(min((x - 1) // 20, 3), 0)))
+# data['AgeGroup'] = data['AgeGroup'].astype('Int64')
+# values = {}
+# for i in range(4):
+#     values[i] = len(data[data['AgeGroup'] == i])
+# plt.plot(values.keys(), values.values())
+# plt.show()
+
+# any cishet woman's dream: finding all men
+# -----------------------------------------
+# male_values = {}
+# for i in range(4):
+#     male_values[i] = len(data[(data['Survived'] == 1) & (data['Sex'] == 'male') & (data['AgeGroup'] == i)])
+# plt.plot(male_values.keys(), male_values.values())
+# plt.ylabel("Number of surviving males")
+# plt.xlabel("Age group")
+# plt.show()
