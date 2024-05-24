@@ -101,7 +101,11 @@ def male_statistics(data):
     plt.show()
 
 
-def fill_null_entries(data):
+def fill_null_entries(data): # doar mediile supravietuitorilor / ale mortilor
+    # mean_age_sv = data[(data['Survived'] == 1)]['Age'].mean()
+    # mean_age_dc = data[(data['Survived'] == 0)]['Age'].mean()
+    # for i in [0, 1]:
+    #     data.loc[(data['Survived'] == i) & (data['Age'].isnull().sum(axis=0)), 'Age'] = data[(data['Survived'] == i)]['Age'].mean()
     mean_age = data['Age'].mean()
     data['Age'] = data['Age'].fillna(mean_age)
     for label in ['Cabin', 'Embarked']:
@@ -142,3 +146,8 @@ def correlation(data):
             aux_split_data.drop(header, axis='columns', inplace=True)
     sb.catplot(aux_split_data.head(100), x='Pclass', y='Fare', col='Survived', kind='swarm', size=2)
     plt.show()
+
+# fill_null_entries(data)
+# print(data)
+null_statistics(data)
+# print(data['Age'].isnull() == 1)
