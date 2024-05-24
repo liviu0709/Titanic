@@ -1,6 +1,7 @@
 import scipy as sp
 from sklearn.tree import DecisionTreeClassifier # Import Decision Tree Classifier
 from sklearn.model_selection import train_test_split # Import train_test_split function
+from sklearn.preprocessing import MinMaxScaler
 from sklearn import metrics #Import scikit-learn metrics module for accuracy calculation
 
 from sklearn.tree import export_graphviz
@@ -16,12 +17,46 @@ import numpy as np
 import Task2
 import Task1
 
+# Adds parent directory to be able to import from it
+import sys
+sys.path.append("..")
+import data_read
+
 import warnings
+# Warnings are never important !
 warnings.filterwarnings('ignore')
+
+def sexToNum(data, indexCrt):
+    for i in range(len(data)):
+        if data.iloc[i, indexCrt] == "male":
+            data.iloc[i, indexCrt] = 0
+        else:
+            data.iloc[i, indexCrt] = 1
+    return data
+
+def embarkToNum(data, indexCrt):
+    for i in range(len(data)):
+        if data.iloc[i, indexCrt] == "S":
+            data.iloc[i, indexCrt] = 0
+        elif data.iloc[i, indexCrt] == "C":
+            data.iloc[i, indexCrt] = 1
+        elif data.iloc[i, indexCrt] == "Q":
+            data.iloc[i, indexCrt] = 0.5
+    return data
+
+def normaliseColumns(data, columns):
+    scaler = MinMaxScaler()
+    for c in columns:
+        data[c] = scaler.fit_transform(data[[c]])
+    return data
+
+# Convert whats down here to function depending on feature and normalise cols
+# Also graphical interface
+
 
 # Columns to be used as features
 feature_cols = ['Age', 'Pclass', 'Sex', 'Fare']
-
+cols_normalise = ['Age', 'Fare']
 # Testing protocol:
 # -> ../train.csv is the input file
 #-> ../test.csv is the file to be used for testing
@@ -29,13 +64,9 @@ feature_cols = ['Age', 'Pclass', 'Sex', 'Fare']
 # Preprocessing -> load adata
 data = pd.read_csv("../train.csv")
 
-# To update by using Part 1 -> Task 8
-toFill = ['Age', 'Fare', 'SibSp', 'Parch']
-# Fill Nan with mean value
-for column in toFill:
-    data[column].fillna(data[column].mean(), inplace=True)
 
-data['Cabin'] = data['Cabin'].fillna('C')
+# Using Part 1 -> Task 8
+data_read.fill_null_entries(data)
 
 # Convert sex to numeric
 # male -> 0
@@ -43,21 +74,12 @@ data['Cabin'] = data['Cabin'].fillna('C')
 # Convert embarked to numeric
 # S -> 0
 # C -> 1
-for i in range(len(data)):
-    if data.iloc[i, 4] == "male":
-        data.iloc[i, 4] = 0
-    else:
-        data.iloc[i, 4] = 1
-    if data.iloc[i, 11] == "S":
-        data.iloc[i, 11] = 0
-    elif data.iloc[i, 11] == "C":
-        data.iloc[i, 11] = 1
-    elif data.iloc[i, 11] == "Q":
-        data.iloc[i, 11] = 0.5
-    # Cabin -> ASCII code first letter
-    data.iloc[i, 10] = ord(data.iloc[i, 10][0])
+data = sexToNum(data, 4)
+data = embarkToNum(data, 11)
 
 data.to_csv('filled.csv', index=False)
+
+data = normaliseColumns(data, cols_normalise)
 
 # Remove outliers using Task 1 and Task 2
 # Depending on best accuracy, choose one of the two methods
@@ -80,19 +102,6 @@ data = Task2.removeOutliersZScore(data, 'SibSp', 2)
 data = Task1.RemoveOutliersInterquartile(data, 'Parch', 0)
 
 data.to_csv('NoOutliersModel.csv', index=False)
-
-# TODO normalise Cabin
-# cabins = data['Cabin'].unique()
-# cabins.sort()
-# print(cabins)
-
-# data['Cabin'] = data['Cabin'].apply(lambda x: (x - cabins[0]) / (cabins[-1] - cabins[0]))
-
-# cabins = data['Cabin'].unique()
-# cabins.sort()
-# print(cabins)
-
-# Using cabin as a feature for the model does not improve accuracy
 
 # Split dataset in features and target variable
 X = data[feature_cols] # Features
@@ -117,28 +126,13 @@ print("Accuracy on 20% of training data no outliers:",metrics.accuracy_score(y_t
 
 data = pd.read_csv("../test.csv")
 
-# To update by using Part 1 -> Task 8
-toFill = ['Age', 'Fare', 'SibSp', 'Parch']
-# Fill Nan with mean value
-for column in toFill:
-    data[column].fillna(data[column].mean(), inplace=True)
+# Using Part 1 -> Task 8
+data_read.fill_null_entries(data)
 
-data['Cabin'] = data['Cabin'].fillna('C')
+data = sexToNum(data, 3)
+data = embarkToNum(data, 10)
 
-for i in range(len(data)):
-    if data.iloc[i, 3] == "male":
-        data.iloc[i, 3] = 0
-    else:
-        data.iloc[i, 3] = 1
-    if data.iloc[i, 10] == "S":
-        data.iloc[i, 10] = 0
-    elif data.iloc[i, 10] == "C":
-        data.iloc[i, 10] = 1
-    elif data.iloc[i, 10] == "Q":
-        data.iloc[i, 10] = 0.5
-    # Cabin -> ASCII code first letter
-    data.iloc[i, 9] = ord(data.iloc[i, 9][0])
-
+data = normaliseColumns(data, cols_normalise)
 
 X_test = data[feature_cols] # Features
 
@@ -146,9 +140,7 @@ data = pd.read_csv("../gender_submission.csv")
 
 y_test = data['Survived'] # Target variable
 
-# clf = clf.fit(X_train,y_train)
-
-#Predict the response for test dataset
+# Predict the response for test dataset
 y_pred = clf.predict(X_test)
 
 # Model Accuracy, how often is the classifier correct?
@@ -177,7 +169,7 @@ plt.subplot(1, 2, 1)
 colors = ['red', 'black', 'green', 'blue', 'purple']
 plt.bar(features, importances, color=colors)
 plt.xlabel('Feature name')
-plt.ylabel('Importance in %')
+plt.ylabel('Importance (%)')
 plt.title('Feature importances')
 
 
