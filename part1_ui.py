@@ -1,9 +1,10 @@
+import sys
 import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sb
 import math
 import re
-import seaborn as sb
-import data_read
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QComboBox
 
 data = pd.read_csv("train.csv") # index_col="PassengerId"
 
@@ -40,13 +41,11 @@ def survival_percentage(data):
     plt.scatter(percentages.keys(), percentages.values())
     plt.show()
 
-def histograms(data):
-    for header in data.keys():
-        if data[header].dtype in ["int64", "float64"] and header != 'PassengerId':
-            plt.hist(data[header])
-            plt.xlabel(header)
-            plt.ylabel("Number of Passengers")
-            plt.show()
+def histograms(data, header):
+    plt.hist(data[header])
+    plt.xlabel(header)
+    plt.ylabel("Number of Passengers")
+    plt.show()
 
 def null_statistics(data):
     nulls = data.isnull().sum(axis=0)
@@ -144,4 +143,93 @@ def correlation(data):
     sb.catplot(aux_split_data.head(100), x='Pclass', y='Fare', col='Survived', kind='swarm', size=2)
     plt.show()
 
-histograms(data)
+class HistogramWindow(QWidget):
+    def __init__(self, data):
+        super().__init__()
+        self.data = data
+        self.initUI()
+        
+    def initUI(self):
+        self.setWindowTitle('Select Histogram')
+        
+        layout = QVBoxLayout()
+        
+        self.combo = QComboBox(self)
+        numerical_headers = [header for header in self.data.columns if self.data[header].dtype in ["int64", "float64"]]
+        self.combo.addItems(numerical_headers)
+        layout.addWidget(self.combo)
+        
+        self.btn_show_histogram = QPushButton('Show Histogram', self)
+        self.btn_show_histogram.clicked.connect(self.show_histogram)
+        layout.addWidget(self.btn_show_histogram)
+        
+        self.setLayout(layout)
+        self.setGeometry(300, 300, 300, 200)
+        
+    def show_histogram(self):
+        header = self.combo.currentText()
+        histograms(self.data, header)
+        plt.show()
+
+class TitanicApp(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.initUI()
+        
+    def initUI(self):
+        self.setWindowTitle('Titanic Data Analysis')
+        
+        layout = QVBoxLayout()
+        
+        self.btn_statistics = QPushButton('Show Statistics', self)
+        self.btn_statistics.clicked.connect(lambda: statistics(data))
+        layout.addWidget(self.btn_statistics)
+        
+        self.btn_survival_percentage = QPushButton('Show Survival Percentage', self)
+        self.btn_survival_percentage.clicked.connect(lambda: survival_percentage(data))
+        layout.addWidget(self.btn_survival_percentage)
+        
+        self.btn_histograms = QPushButton('Show Histograms', self)
+        self.btn_histograms.clicked.connect(self.open_histogram_window)
+        layout.addWidget(self.btn_histograms)
+        
+        self.btn_null_statistics = QPushButton('Show Null Statistics', self)
+        self.btn_null_statistics.clicked.connect(lambda: null_statistics(data))
+        layout.addWidget(self.btn_null_statistics)
+        
+        self.btn_age_statistics = QPushButton('Show Age Statistics', self)
+        self.btn_age_statistics.clicked.connect(lambda: age_statistics(data))
+        layout.addWidget(self.btn_age_statistics)
+        
+        self.btn_add_age_group = QPushButton('Add Age Group and Show', self)
+        self.btn_add_age_group.clicked.connect(lambda: add_age_group(data))
+        layout.addWidget(self.btn_add_age_group)
+        
+        self.btn_male_statistics = QPushButton('Show Male Statistics', self)
+        self.btn_male_statistics.clicked.connect(lambda: male_statistics(data))
+        layout.addWidget(self.btn_male_statistics)
+        
+        self.btn_fill_null_entries = QPushButton('Fill Null Entries', self)
+        self.btn_fill_null_entries.clicked.connect(lambda: fill_null_entries(data))
+        layout.addWidget(self.btn_fill_null_entries)
+        
+        self.btn_check_title_gender = QPushButton('Check Title Gender', self)
+        self.btn_check_title_gender.clicked.connect(lambda: check_title_gender(data))
+        layout.addWidget(self.btn_check_title_gender)
+        
+        self.btn_correlation = QPushButton('Show Correlation', self)
+        self.btn_correlation.clicked.connect(lambda: correlation(data))
+        layout.addWidget(self.btn_correlation)
+        
+        self.setLayout(layout)
+        self.setGeometry(300, 300, 300, 200)
+        self.show()
+        
+    def open_histogram_window(self):
+        self.histogram_window = HistogramWindow(data)
+        self.histogram_window.show()
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    ex = TitanicApp()
+    sys.exit(app.exec_())
