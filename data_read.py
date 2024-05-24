@@ -131,10 +131,10 @@ female_titles = ['Mrs', 'Miss', 'Ms', 'Lady', 'Mlle', 'Countess', 'Dona']
 # ------------------------------------------------
 # filling in the gaps (insert another sexist joke)
 # ------------------------------------------------
-mean_age = data['Age'].mean()
-data['Age'] = data['Age'].fillna(mean_age)
-for label in ['Cabin', 'Embarked']:
-    data[label] = data[label].fillna(data[label].value_counts().keys()[0])   
+# mean_age = data['Age'].mean()
+# data['Age'] = data['Age'].fillna(mean_age)
+# for label in ['Cabin', 'Embarked']:
+#     data[label] = data[label].fillna(data[label].value_counts().keys()[0])   
 
 # --------------------------
 # it's time to be homophobic
@@ -154,3 +154,13 @@ for label in ['Cabin', 'Embarked']:
 #             titles[temp[0].strip(' ')] = data['Name'].str.contains(temp[0]).sum()
 # plt.plot(titles.keys(), titles.values())
 # plt.show()
+
+# ----------------------------
+# it's conspiracy theory time!
+# ----------------------------
+split_data = data
+for header in split_data.axes[1]:
+    if header != "Survived" and header != "SibSp":
+        split_data.drop(header, axis='columns', inplace=True)
+print(split_data.corr())
+print("Putem trage concluzia ca starea de celibat pe vas nu a influențat considerabil rata de supraviețuire.")
