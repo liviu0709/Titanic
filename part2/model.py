@@ -10,6 +10,7 @@ import pydotplus
 
 import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sb
 import numpy as np
 
 import Task2
@@ -17,6 +18,9 @@ import Task1
 
 import warnings
 warnings.filterwarnings('ignore')
+
+# Columns to be used as features
+feature_cols = ['Age', 'Pclass', 'Sex', 'Fare']
 
 # Testing protocol:
 # -> ../train.csv is the input file
@@ -59,8 +63,8 @@ data.to_csv('filled.csv', index=False)
 # Depending on best accuracy, choose one of the two methods
 
 # Get data without outliers for age
-data = Task2.removeOutliersZScore(data, 'Age', 3)
-# data = Task1.RemoveOutliersInterquartile(data, 'Age', 0)
+# data = Task2.removeOutliersZScore(data, 'Age', 3)
+data = Task1.RemoveOutliersInterquartile(data, 'Age', 0)
 
 
 # Get data without outliers for fare
@@ -72,8 +76,8 @@ data = Task2.removeOutliersZScore(data, 'SibSp', 2)
 # data = Task1.RemoveOutliersInterquartile(data, 'SibSp', 0)
 
 # Get data without outliers for Parch
-data = Task2.removeOutliersZScore(data, 'Parch', 2)
-# data = Task1.RemoveOutliersInterquartile(data, 'Parch', 0)
+# data = Task2.removeOutliersZScore(data, 'Parch', 2)
+data = Task1.RemoveOutliersInterquartile(data, 'Parch', 0)
 
 data.to_csv('NoOutliersModel.csv', index=False)
 
@@ -91,7 +95,6 @@ data.to_csv('NoOutliersModel.csv', index=False)
 # Using cabin as a feature for the model does not improve accuracy
 
 # Split dataset in features and target variable
-feature_cols = ['Age', 'Pclass', 'Sex', 'Parch']
 X = data[feature_cols] # Features
 y = data['Survived'] # Target variable
 
@@ -108,7 +111,7 @@ clf = clf.fit(X_train,y_train)
 y_pred = clf.predict(X_test)
 
 # Model Accuracy, how often is the classifier correct?
-print("Accuracy on 20% of training data no outliers:",metrics.accuracy_score(y_test, y_pred))
+print("Accuracy on 20% of training data no outliers:",metrics.accuracy_score(y_test, y_pred), metrics.log_loss(y_test, y_pred))
 
 # Use this on test data
 
@@ -136,7 +139,7 @@ for i in range(len(data)):
     # Cabin -> ASCII code first letter
     data.iloc[i, 9] = ord(data.iloc[i, 9][0])
 
-feature_cols = ['Age', 'Pclass', 'Sex', 'Parch']
+
 X_test = data[feature_cols] # Features
 
 data = pd.read_csv("../gender_submission.csv")
@@ -149,7 +152,7 @@ y_test = data['Survived'] # Target variable
 y_pred = clf.predict(X_test)
 
 # Model Accuracy, how often is the classifier correct?
-print("Accuracy on test data:",metrics.accuracy_score(y_test, y_pred))
+print("Accuracy on test data:",metrics.accuracy_score(y_test, y_pred), metrics.log_loss(y_test, y_pred))
 
 dot_data = StringIO()
 export_graphviz(clf, out_file=dot_data,
@@ -158,3 +161,36 @@ export_graphviz(clf, out_file=dot_data,
 graph = pydotplus.graph_from_dot_data(dot_data.getvalue())
 graph.write_png('DecisionTree.png')
 Image(graph.create_png())
+
+importances = clf.feature_importances_
+features = X.columns
+
+print("Feature importances:", importances)
+print("Features:", features)
+
+# Convert to % for nice look
+importances = [x * 100 for x in importances]
+# Plot relevant graphs
+# importances vs features
+# Subplot -> 1 row, 2 columns, 1st plot
+plt.subplot(1, 2, 1)
+colors = ['red', 'black', 'green', 'blue', 'purple']
+plt.bar(features, importances, color=colors)
+plt.xlabel('Feature name')
+plt.ylabel('Importance in %')
+plt.title('Feature importances')
+
+
+# Confusion matrix -> Compares true values with pred
+# Subplot -> 1 row, 2 columns, 2nd plot
+plt.subplot(1, 2, 2)
+# cmap -> color scheme
+# fmt -> format of the numbers
+sb.heatmap(metrics.confusion_matrix(y_test, y_pred), annot=True, fmt='d', cmap='Reds', xticklabels=['Nu a supraviețuit', 'A supraviețuit'], yticklabels=['Nu a supraviețuit', 'A supraviețuit'])
+plt.xlabel('Predicted')
+plt.xticks(rotation='horizontal')
+plt.ylabel('True')
+plt.title('Confusion matrix')
+plt.show()
+
+# TODO ROC curve
