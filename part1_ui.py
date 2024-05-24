@@ -4,7 +4,9 @@ import matplotlib.pyplot as plt
 import seaborn as sb
 import math
 import re
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QComboBox
+import PyQt5.QtWidgets as pq
+import PyQt5.QtCore as pc
+import PyQt5.QtGui as pg
 
 data = pd.read_csv("train.csv") # index_col="PassengerId"
 
@@ -143,7 +145,7 @@ def correlation(data):
     sb.catplot(aux_split_data.head(100), x='Pclass', y='Fare', col='Survived', kind='swarm', size=2)
     plt.show()
 
-class HistogramWindow(QWidget):
+class HistogramWindow(pq.QWidget):
     def __init__(self, data):
         super().__init__()
         self.data = data
@@ -152,18 +154,18 @@ class HistogramWindow(QWidget):
     def initUI(self):
         self.setWindowTitle('Select Histogram')
         
-        layout = QVBoxLayout()
+        main_layout = pq.QVBoxLayout()
         
-        self.combo = QComboBox(self)
+        self.combo = pq.QComboBox(self)
         numerical_headers = [header for header in self.data.columns if self.data[header].dtype in ["int64", "float64"]]
         self.combo.addItems(numerical_headers)
-        layout.addWidget(self.combo)
+        main_layout.addWidget(self.combo)
         
-        self.btn_show_histogram = QPushButton('Show Histogram', self)
+        self.btn_show_histogram = pq.QPushButton('Show Histogram', self)
         self.btn_show_histogram.clicked.connect(self.show_histogram)
-        layout.addWidget(self.btn_show_histogram)
+        main_layout.addWidget(self.btn_show_histogram)
         
-        self.setLayout(layout)
+        self.setLayout  main_layout)
         self.setGeometry(300, 300, 300, 200)
         
     def show_histogram(self):
@@ -171,7 +173,7 @@ class HistogramWindow(QWidget):
         histograms(self.data, header)
         plt.show()
 
-class TitanicApp(QWidget):
+class TitanicApp(pq.QWidget):
     def __init__(self):
         super().__init__()
         self.initUI()
@@ -179,49 +181,51 @@ class TitanicApp(QWidget):
     def initUI(self):
         self.setWindowTitle('Titanic Data Analysis')
         
-        layout = QVBoxLayout()
+        primary_layout = pq.QVBoxLayout()
+        main_layout = pq.QHBoxLayout()
         
-        self.btn_statistics = QPushButton('Show Statistics', self)
+        self.btn_statistics = pq.QPushButton('Show Statistics', self)
         self.btn_statistics.clicked.connect(lambda: statistics(data))
-        layout.addWidget(self.btn_statistics)
+        main_layout.addWidget(self.btn_statistics)
         
-        self.btn_survival_percentage = QPushButton('Show Survival Percentage', self)
+        self.btn_survival_percentage = pq.QPushButton('Show Survival Percentage', self)
         self.btn_survival_percentage.clicked.connect(lambda: survival_percentage(data))
-        layout.addWidget(self.btn_survival_percentage)
+        main_layout.addWidget(self.btn_survival_percentage)
         
-        self.btn_histograms = QPushButton('Show Histograms', self)
+        self.btn_histograms = pq.QPushButton('Show Histograms', self)
         self.btn_histograms.clicked.connect(self.open_histogram_window)
-        layout.addWidget(self.btn_histograms)
+        main_layout.addWidget(self.btn_histograms)
         
-        self.btn_null_statistics = QPushButton('Show Null Statistics', self)
+        self.btn_null_statistics = pq.QPushButton('Show Null Statistics', self)
         self.btn_null_statistics.clicked.connect(lambda: null_statistics(data))
-        layout.addWidget(self.btn_null_statistics)
+        main_layout.addWidget(self.btn_null_statistics)
         
-        self.btn_age_statistics = QPushButton('Show Age Statistics', self)
+        self.btn_age_statistics = pq.QPushButton('Show Age Statistics', self)
         self.btn_age_statistics.clicked.connect(lambda: age_statistics(data))
-        layout.addWidget(self.btn_age_statistics)
+        main_layout.addWidget(self.btn_age_statistics)
         
-        self.btn_add_age_group = QPushButton('Add Age Group and Show', self)
+        self.btn_add_age_group = pq.QPushButton('Add Age Group and Show', self)
         self.btn_add_age_group.clicked.connect(lambda: add_age_group(data))
-        layout.addWidget(self.btn_add_age_group)
+        main_layout.addWidget(self.btn_add_age_group)
         
-        self.btn_male_statistics = QPushButton('Show Male Statistics', self)
+        self.btn_male_statistics = pq.QPushButton('Show Male Statistics', self)
         self.btn_male_statistics.clicked.connect(lambda: male_statistics(data))
-        layout.addWidget(self.btn_male_statistics)
+        main_layout.addWidget(self.btn_male_statistics)
         
-        self.btn_fill_null_entries = QPushButton('Fill Null Entries', self)
+        self.btn_fill_null_entries = pq.QPushButton('Fill Null Entries', self)
         self.btn_fill_null_entries.clicked.connect(lambda: fill_null_entries(data))
-        layout.addWidget(self.btn_fill_null_entries)
+        main_layout.addWidget(self.btn_fill_null_entries)
         
-        self.btn_check_title_gender = QPushButton('Check Title Gender', self)
+        self.btn_check_title_gender = pq.QPushButton('Check Title Gender', self)
         self.btn_check_title_gender.clicked.connect(lambda: check_title_gender(data))
-        layout.addWidget(self.btn_check_title_gender)
+        main_layout.addWidget(self.btn_check_title_gender)
         
-        self.btn_correlation = QPushButton('Show Correlation', self)
+        self.btn_correlation = pq.QPushButton('Show Correlation', self)
         self.btn_correlation.clicked.connect(lambda: correlation(data))
-        layout.addWidget(self.btn_correlation)
+        main_layout.addWidget(self.btn_correlation)
         
-        self.setLayout(layout)
+        primary_layout.addLayout(main_layout)
+        self.setLayout(primary_layout)
         self.setGeometry(300, 300, 300, 200)
         self.show()
         
@@ -230,6 +234,6 @@ class TitanicApp(QWidget):
         self.histogram_window.show()
 
 if __name__ == '__main__':
-    app = QApplication(sys.argv)
+    app = pq.QApplication(sys.argv)
     ex = TitanicApp()
     sys.exit(app.exec_())
