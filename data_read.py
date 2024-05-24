@@ -2,6 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import math
 import re
+import seaborn as sb
 
 data = pd.read_csv("train.csv") # index_col="PassengerId"
 
@@ -158,9 +159,15 @@ female_titles = ['Mrs', 'Miss', 'Ms', 'Lady', 'Mlle', 'Countess', 'Dona']
 # ----------------------------
 # it's conspiracy theory time!
 # ----------------------------
-split_data = data
+split_data = data.copy()
 for header in split_data.axes[1]:
-    if header != "Survived" and header != "SibSp":
+    if header not in ["Survived", "SibSp"]:
         split_data.drop(header, axis='columns', inplace=True)
 print(split_data.corr())
 print("Putem trage concluzia ca starea de celibat pe vas nu a influențat considerabil rata de supraviețuire.")
+aux_split_data = data.copy()
+for header in aux_split_data.axes[1]:
+    if header not in ["Survived", "Fare", "Pclass"]:
+        aux_split_data.drop(header, axis='columns', inplace=True)
+sb.catplot(aux_split_data.head(100), x='Pclass', y='Fare', col='Survived', kind='swarm', size=2)
+plt.show()
