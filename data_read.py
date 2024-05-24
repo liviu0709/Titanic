@@ -8,24 +8,29 @@ data = pd.read_csv("train.csv") # index_col="PassengerId"
 male_titles = ['Mr', 'Don', 'Rev', 'Sir', 'Count']
 female_titles = ['Mrs', 'Miss', 'Ms', 'Lady', 'Mlle', 'Countess', 'Dona']
 
+# ------------------
 # print various info
 # ------------------
 # col_num = len(data.axes[1])
 # row_num = len(data.axes[0])
 # print(data.dtypes)
 
+# --------------
 # print the data
 # --------------
 # print(data)
 
+# -------------------------------------
 # no of cols, dtype of cols, no of rows
 # -------------------------------------
 # data.info()
 
+# ---------------------------------
 # no of missing elems for every row
 # ---------------------------------
 # print(data.isnull().sum(axis=0))
 
+# ------------------------
 # index of duplicate lines
 # ------------------------
 # dupes = data.duplicated()
@@ -35,6 +40,7 @@ female_titles = ['Mrs', 'Miss', 'Ms', 'Lady', 'Mlle', 'Countess', 'Dona']
 #         dupe_index.append(i)
 # print(dupe_index)
 
+# -----------------------
 # percentage of survivors
 # -----------------------
 # percentages = {}
@@ -45,6 +51,7 @@ female_titles = ['Mrs', 'Miss', 'Ms', 'Lady', 'Mlle', 'Countess', 'Dona']
 # plt.scatter(percentages.keys(), percentages.values())
 # plt.show()
 
+# ------------------------------
 # histograms for numeric columns
 # ------------------------------
 # for header in data.keys():
@@ -55,6 +62,7 @@ female_titles = ['Mrs', 'Miss', 'Ms', 'Lady', 'Mlle', 'Countess', 'Dona']
 #         plt.ylabel("Number of Passengers")
 #         plt.show()
 
+# --------------------------
 # NaN elements for every col
 # --------------------------
 # nulls = data.isnull().sum(axis=0)
@@ -74,7 +82,8 @@ female_titles = ['Mrs', 'Miss', 'Ms', 'Lady', 'Mlle', 'Countess', 'Dona']
 #             else:
 #                 print("Deceased's", header, "column has", nulls[header], "null values, which equals to", prop, "% of values.")
 # print()
-                
+
+# -------------------------------------------------
 # splitting the dataset between children and adults
 # -------------------------------------------------
 # children_data = data[(data['Age'] < 18)]
@@ -97,6 +106,7 @@ female_titles = ['Mrs', 'Miss', 'Ms', 'Lady', 'Mlle', 'Countess', 'Dona']
 # print("Percentage of children passengers:", children_perc)
 # print("Percentage of adult passengers:", adult_perc)
 
+# ----------------------------------------
 # splitting the dataset between age groups
 # ----------------------------------------
 # data['AgeGroup'] = data['Age'].apply(lambda x: x if math.isnan(x) else int(max(min((x - 1) // 20, 3), 0)))
@@ -107,6 +117,7 @@ female_titles = ['Mrs', 'Miss', 'Ms', 'Lady', 'Mlle', 'Countess', 'Dona']
 # plt.plot(values.keys(), values.values())
 # plt.show()
 
+# -----------------------------------------
 # any cishet woman's dream: finding all men
 # -----------------------------------------
 # male_values = {}
@@ -117,20 +128,29 @@ female_titles = ['Mrs', 'Miss', 'Ms', 'Lady', 'Mlle', 'Countess', 'Dona']
 # plt.xlabel("Age group")
 # plt.show()
 
+# ------------------------------------------------
+# filling in the gaps (insert another sexist joke)
+# ------------------------------------------------
+mean_age = data['Age'].mean()
+data['Age'] = data['Age'].fillna(mean_age)
+for label in ['Cabin', 'Embarked']:
+    data[label] = data[label].fillna(data[label].value_counts().keys()[0])   
+
+# --------------------------
 # it's time to be homophobic
 # --------------------------
-titles = {}
-for name in data['Name']:
-    temp = re.findall(" [a-zA-Z]+\. ", name)
-    if temp[0].strip(' .') not in titles.keys() and temp[0].strip(' .') in male_titles:
-        temp_data = data[(data['Sex'] == 'male')]
-        # print("temp stip:", temp[0].strip(' '))
-        titles[temp[0].strip(' ')] = temp_data['Name'].str.contains(temp[0]).sum()
-    else:
-        if temp[0].strip(' .') not in titles.keys() and temp[0].strip(' .') in female_titles:
-            temp_data = data[(data['Sex'] == 'female')]
-            titles[temp[0].strip(' ')] = temp_data['Name'].str.contains(temp[0]).sum()
-        else:
-            titles[temp[0].strip(' ')] = data['Name'].str.contains(temp[0]).sum()
-plt.plot(titles.keys(), titles.values())
-plt.show()
+# titles = {}
+# for name in data['Name']:
+#     temp = re.findall(" [a-zA-Z]+\. ", name)
+#     if temp[0].strip(' .') not in titles.keys() and temp[0].strip(' .') in male_titles:
+#         temp_data = data[(data['Sex'] == 'male')]
+#         # print("temp stip:", temp[0].strip(' '))
+#         titles[temp[0].strip(' ')] = temp_data['Name'].str.contains(temp[0]).sum()
+#     else:
+#         if temp[0].strip(' .') not in titles.keys() and temp[0].strip(' .') in female_titles:
+#             temp_data = data[(data['Sex'] == 'female')]
+#             titles[temp[0].strip(' ')] = temp_data['Name'].str.contains(temp[0]).sum()
+#         else:
+#             titles[temp[0].strip(' ')] = data['Name'].str.contains(temp[0]).sum()
+# plt.plot(titles.keys(), titles.values())
+# plt.show()
