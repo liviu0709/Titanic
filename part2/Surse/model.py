@@ -19,7 +19,7 @@ import Task1
 
 # Adds parent directory to be able to import from it
 import sys
-sys.path.append("..")
+sys.path.append("../../")
 import data_read
 
 import warnings
@@ -44,6 +44,25 @@ def embarkToNum(data, indexCrt):
             data.iloc[i, indexCrt] = 0.5
     return data
 
+def cabinToNum(data, indexCrt):
+    for i in range(len(data)):
+        if data.iloc[i, indexCrt] == "A":
+            data.iloc[i, indexCrt] = 0
+        elif data.iloc[i, indexCrt] == "B":
+            data.iloc[i, indexCrt] = 1
+        elif data.iloc[i, indexCrt] == "C":
+            data.iloc[i, indexCrt] = 2
+        elif data.iloc[i, indexCrt] == "D":
+            data.iloc[i, indexCrt] = 3
+        elif data.iloc[i, indexCrt] == "E":
+            data.iloc[i, indexCrt] = 4
+        elif data.iloc[i, indexCrt] == "F":
+            data.iloc[i, indexCrt] = 5
+        elif data.iloc[i, indexCrt] == "G":
+            data.iloc[i, indexCrt] = 6
+        else:
+            data.iloc[i, indexCrt] = 7
+
 def normaliseColumns(data, columns):
     scaler = MinMaxScaler()
     for c in columns:
@@ -64,7 +83,7 @@ def buildModel(feature_cols, cols_normalise):
     #-> ../test.csv is the file to be used for testing
 
     # Preprocessing -> load adata
-    data = pd.read_csv("../train.csv")
+    data = pd.read_csv("../../train.csv")
 
 
     # Using Part 1 -> Task 8
@@ -78,8 +97,9 @@ def buildModel(feature_cols, cols_normalise):
     # C -> 1
     data = sexToNum(data, 4)
     data = embarkToNum(data, 11)
+    date = cabinToNum(data, 10)
 
-    data.to_csv('filled.csv', index=False)
+    data.to_csv('../Date/filled.csv', index=False)
 
     data = normaliseColumns(data, cols_normalise)
 
@@ -103,7 +123,7 @@ def buildModel(feature_cols, cols_normalise):
     # data = Task2.removeOutliersZScore(data, 'Parch', 2)
     data = Task1.RemoveOutliersInterquartile(data, 'Parch', 0)
 
-    data.to_csv('noOutliersModel.csv', index=False)
+    data.to_csv('../Date/noOutliersModel.csv', index=False)
 
     # Split dataset in features and target variable
     X = data[feature_cols] # Features
@@ -126,7 +146,7 @@ def buildModel(feature_cols, cols_normalise):
 
     # Use this on test data
 
-    data = pd.read_csv("../test.csv")
+    data = pd.read_csv("../../test.csv")
 
     # Using Part 1 -> Task 8
     # data_read.fill_null_entries(data)
@@ -134,12 +154,13 @@ def buildModel(feature_cols, cols_normalise):
 
     data = sexToNum(data, 3)
     data = embarkToNum(data, 10)
+    date = cabinToNum(data, 9)
 
     data = normaliseColumns(data, cols_normalise)
 
     X_test = data[feature_cols] # Features
 
-    data = pd.read_csv("../gender_submission.csv")
+    data = pd.read_csv("../../gender_submission.csv")
 
     y_test = data['Survived'] # Target variable
 
