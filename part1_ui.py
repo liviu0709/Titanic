@@ -8,6 +8,7 @@ import PyQt5.QtWidgets as pq
 import PyQt5.QtCore as pc
 import PyQt5.QtGui as pg
 
+filepath = ''
 data = pd.read_csv("train.csv") # index_col="PassengerId"
 
 male_titles = ['Mr', 'Don', 'Rev', 'Sir', 'Count']
@@ -158,6 +159,7 @@ class HistogramWindow(pq.QWidget):
         
         self.combo = pq.QComboBox(self)
         numerical_headers = [header for header in self.data.columns if self.data[header].dtype in ["int64", "float64"]]
+        numerical_headers.remove('PassengerId')
         self.combo.addItems(numerical_headers)
         main_layout.addWidget(self.combo)
         
@@ -165,7 +167,7 @@ class HistogramWindow(pq.QWidget):
         self.btn_show_histogram.clicked.connect(self.show_histogram)
         main_layout.addWidget(self.btn_show_histogram)
         
-        self.setLayout  main_layout)
+        self.setLayout(main_layout)
         self.setGeometry(300, 300, 300, 200)
         
     def show_histogram(self):
@@ -177,7 +179,7 @@ class TitanicApp(pq.QWidget):
     def __init__(self):
         super().__init__()
         self.initUI()
-        
+
     def initUI(self):
         self.setWindowTitle('Titanic Data Analysis')
         
