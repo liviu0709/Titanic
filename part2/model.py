@@ -185,6 +185,7 @@ def buildModel(feature_cols, cols_normalise):
     plt.xticks(rotation='horizontal')
     plt.ylabel('True')
     plt.title('Confusion matrix')
-    plt.show()
+    # Block -> False -> No more error bcz app.exec PyQt5
+    plt.show(block=False)
 
     # TODO ROC curve
