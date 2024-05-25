@@ -1,10 +1,10 @@
 import pandas as pd
 
 import sys
-sys.path.append("..")
+sys.path.append("../../")
 import data_read
 
-data = pd.read_csv("noOutliersModel.csv")
+data = pd.read_csv("../Date/noOutliersModel.csv")
 
 # Compare output data with the one from Part 1
 
