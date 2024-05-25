@@ -175,7 +175,7 @@ def buildModel(feature_cols, cols_normalise):
                     filled=True, rounded=True,
                     special_characters=True,feature_names = feature_cols,class_names=['0','1'])
     graph = pydotplus.graph_from_dot_data(dot_data.getvalue())
-    graph.write_png('DecisionTree.png')
+    graph.write_png('../Date/DecisionTree.png')
     Image(graph.create_png())
 
     importances = clf.feature_importances_
