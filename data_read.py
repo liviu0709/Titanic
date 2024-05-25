@@ -5,11 +5,6 @@ import re
 import seaborn as sb
 import data_read
 
-data = pd.read_csv("train.csv") # index_col="PassengerId"
-
-male_titles = ['Mr', 'Don', 'Rev', 'Sir', 'Count']
-female_titles = ['Mrs', 'Miss', 'Ms', 'Lady', 'Mlle', 'Countess', 'Dona']
-
 def null_entries(data):
     print(data.isnull().sum(axis=0))
 
@@ -111,6 +106,8 @@ def fill_null_entries(data): # doar mediile supravietuitorilor / ale mortilor
 
 
 def check_title_gender(data):
+    male_titles = ['Mr', 'Don', 'Rev', 'Sir', 'Count']
+    female_titles = ['Mrs', 'Miss', 'Ms', 'Lady', 'Mlle', 'Countess', 'Dona']
     titles = {}
     for name in data['Name']:
         temp = re.findall(" [a-zA-Z]+\. ", name)
@@ -143,5 +140,3 @@ def correlation(data):
             aux_split_data.drop(header, axis='columns', inplace=True)
     sb.catplot(aux_split_data.head(100), x='Pclass', y='Fare', col='Survived', kind='swarm', size=2)
     plt.show()
-
-histograms(data)
