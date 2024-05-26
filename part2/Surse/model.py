@@ -1,8 +1,8 @@
 import scipy as sp
-from sklearn.tree import DecisionTreeClassifier # Import Decision Tree Classifier
-from sklearn.model_selection import train_test_split # Import train_test_split function
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
-from sklearn import metrics #Import scikit-learn metrics module for accuracy calculation
+from sklearn import metrics
 
 from sklearn.tree import export_graphviz
 from io import StringIO
@@ -73,18 +73,12 @@ def normaliseColumns(data, columns):
 # Also graphical interface
 
 def buildModel(feature_cols, cols_normalise):
-# DEPRECATED
-# Columns to be used as features
-# feature_cols = ['Age', 'Pclass', 'Sex', 'Fare']
-# cols_normalise = ['Age', 'Fare']
-
     # Testing protocol:
     # -> ../train.csv is the input file
     #-> ../test.csv is the file to be used for testing
 
     # Preprocessing -> load adata
     data = pd.read_csv("../../train.csv")
-
 
     # Using Part 1 -> Task 8
     data_read.fill_null_entries(data)
@@ -109,7 +103,6 @@ def buildModel(feature_cols, cols_normalise):
     # Get data without outliers for age
     # data = Task2.removeOutliersZScore(data, 'Age', 3)
     data = Task1.RemoveOutliersInterquartile(data, 'Age', 0)
-
 
     # Get data without outliers for fare
     # data = Task2.removeOutliersZScore(data, colList[9], 0.5)
@@ -138,19 +131,14 @@ def buildModel(feature_cols, cols_normalise):
     # Train Decision Tree Classifer
     clf = clf.fit(X_train,y_train)
 
-    #Predict the response for test dataset
+    # Predict the response for test dataset
     y_pred = clf.predict(X_test)
 
     # Model Accuracy, how often is the classifier correct?
     print("Accuracy on 20% of training data no outliers:",metrics.accuracy_score(y_test, y_pred), metrics.log_loss(y_test, y_pred))
 
     # Use this on test data
-
     data = pd.read_csv("../../test.csv")
-
-    # Using Part 1 -> Task 8
-    # data_read.fill_null_entries(data)
-    # Cant fill data with mean of survived bcz no survived
 
     data = sexToNum(data, 3)
     data = embarkToNum(data, 10)
@@ -170,6 +158,7 @@ def buildModel(feature_cols, cols_normalise):
     # Model Accuracy, how often is the classifier correct?
     print("Accuracy on test data:",metrics.accuracy_score(y_test, y_pred), metrics.log_loss(y_test, y_pred))
 
+    # Decision tree graph
     dot_data = StringIO()
     export_graphviz(clf, out_file=dot_data,
                     filled=True, rounded=True,
@@ -208,5 +197,3 @@ def buildModel(feature_cols, cols_normalise):
     plt.title('Confusion matrix')
     # Block -> False -> No more error bcz app.exec PyQt5
     plt.show(block=False)
-
-    # TODO ROC curve

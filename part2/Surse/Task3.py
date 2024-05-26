@@ -7,7 +7,6 @@ import data_read
 data = pd.read_csv("../Date/noOutliersModel.csv")
 
 # Compare output data with the one from Part 1
-
 data_read.survival_percentage(data)
 data_read.histograms(data)
 data_read.null_statistics(data)
