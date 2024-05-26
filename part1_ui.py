@@ -51,22 +51,28 @@ def histograms(data, header):
     plt.show()
 
 def null_statistics(data):
+    result = []
     nulls = data.isnull().sum(axis=0)
     for header in nulls.keys():
         if nulls[header] != 0:
             prop = (nulls[header]*100)/len(data[header])
-            print(header, "column has", nulls[header], "null values, which equals to", prop, "% of values.")
-    print()
+            # print(header, "column has", nulls[header], "null values, which equals to", prop, "% of values.")
+            result.append(f"{header} column has {nulls[header]} null values, which equals to {prop}% of values.")
     for i in [0, 1]:
+        result.append("")
         split_dataset=data[(data["Survived"] == i)]
         nulls = split_dataset.isnull().sum(axis=0)
         for header in nulls.keys():
             if nulls[header] != 0:
                 prop = (nulls[header]*100)/len(split_dataset[header])
                 if i:
-                    print("Survivors'", header, "column has", nulls[header], "null values, which equals to", prop, "% of values.")
+                    result.append(f"Survivors' {header} column has {nulls[header]}, null values, which equals to {prop}% of values.")
+                    # print("Survivors'", header, "column has", nulls[header], "null values, which equals to", prop, "% of values.")
                 else:
-                    print("Deceased's", header, "column has", nulls[header], "null values, which equals to", prop, "% of values.")
+                    result.append(f"Deceased's {header} column has {nulls[header]}, null values, which equals to {prop}% of values.")
+                    # print("Deceased's", header, "column has", nulls[header], "null values, which equals to", prop, "% of values.")
+    print("\n".join(result))
+    return "\n".join(result)
 
 def age_statistics(data):
     children_data = data[(data['Age'] < 18)]
@@ -133,43 +139,76 @@ def check_title_gender(data):
 # it's conspiracy theory time!
 # ----------------------------
 def correlation(data):
+    result = []
     split_data = data.copy()
     for header in split_data.axes[1]:
         if header not in ["Survived", "SibSp"]:
             split_data.drop(header, axis='columns', inplace=True)
-    print(split_data.corr())
-    print("Putem trage concluzia ca starea de celibat pe vas nu a influențat considerabil rata de supraviețuire.")
+    result.append(str(split_data.corr()))
+    result.append("Putem trage concluzia ca starea de celibat pe vas nu a influențat considerabil rata de supraviețuire.")
     aux_split_data = data.copy()
     for header in aux_split_data.axes[1]:
         if header not in ["Survived", "Fare", "Pclass"]:
             aux_split_data.drop(header, axis='columns', inplace=True)
     sb.catplot(aux_split_data.head(100), x='Pclass', y='Fare', col='Survived', kind='swarm', size=2)
     plt.show()
+    return "\n".join(result)
+
+class StatWindow(pq.QWidget):
+    def __init__(self, data, code):
+        super().__init__()
+        self.data = data
+        self.code = code
+        self.initUI()
+
+    def initUI(self):
+        text_label = pq.QPlainTextEdit()
+        main_layout = pq.QVBoxLayout()
+        match self.code:
+            case 0:
+                self.setWindowTitle('General Statistics')
+                text_label.setPlainText(statistics(self.data))
+            case 1:
+                self.setWindowTitle('Correlation')
+                text_label.setPlainText(correlation(self.data))
+            case 2:
+                self.setWindowTitle('Null Statistics')
+                text_label.setPlainText(null_statistics(self.data))
+            case 3:
+                self.setWindowTitle('Age Statistics')
+                text_label.setPlainText(age_statistics(self.data))
+            case 4:
+                self.setWindowTitle('Male Statistics')
+                text_label.setPlainText(male_statistics(self.data))
+
+        text_label.setReadOnly(True)
+        main_layout.addWidget(text_label)
+        self.setLayout(main_layout)
 
 class HistogramWindow(pq.QWidget):
     def __init__(self, data):
         super().__init__()
         self.data = data
         self.initUI()
-        
+
     def initUI(self):
         self.setWindowTitle('Select Histogram')
-        
+
         main_layout = pq.QVBoxLayout()
-        
+
         self.combo = pq.QComboBox(self)
         numerical_headers = [header for header in self.data.columns if self.data[header].dtype in ["int64", "float64"]]
         numerical_headers.remove('PassengerId')
         self.combo.addItems(numerical_headers)
         main_layout.addWidget(self.combo)
-        
+
         self.btn_show_histogram = pq.QPushButton('Show Histogram', self)
         self.btn_show_histogram.clicked.connect(self.show_histogram)
         main_layout.addWidget(self.btn_show_histogram)
-        
+
         self.setLayout(main_layout)
         self.setGeometry(300, 300, 300, 200)
-        
+
     def show_histogram(self):
         header = self.combo.currentText()
         histograms(self.data, header)
@@ -182,58 +221,83 @@ class TitanicApp(pq.QWidget):
 
     def initUI(self):
         self.setWindowTitle('Titanic Data Analysis')
-        
+
         primary_layout = pq.QVBoxLayout()
         main_layout = pq.QHBoxLayout()
-        
+
         self.btn_statistics = pq.QPushButton('Show Statistics', self)
-        self.btn_statistics.clicked.connect(lambda: statistics(data))
+        self.btn_statistics.clicked.connect(self.open_stat_window)
         main_layout.addWidget(self.btn_statistics)
-        
+
         self.btn_survival_percentage = pq.QPushButton('Show Survival Percentage', self)
         self.btn_survival_percentage.clicked.connect(lambda: survival_percentage(data))
         main_layout.addWidget(self.btn_survival_percentage)
-        
+
         self.btn_histograms = pq.QPushButton('Show Histograms', self)
         self.btn_histograms.clicked.connect(self.open_histogram_window)
         main_layout.addWidget(self.btn_histograms)
-        
+
         self.btn_null_statistics = pq.QPushButton('Show Null Statistics', self)
-        self.btn_null_statistics.clicked.connect(lambda: null_statistics(data))
+        self.btn_null_statistics.clicked.connect(self.open_null_stat_window)
         main_layout.addWidget(self.btn_null_statistics)
-        
+
         self.btn_age_statistics = pq.QPushButton('Show Age Statistics', self)
-        self.btn_age_statistics.clicked.connect(lambda: age_statistics(data))
+        self.btn_age_statistics.clicked.connect(self.open_age_stat_window)
         main_layout.addWidget(self.btn_age_statistics)
-        
+
         self.btn_add_age_group = pq.QPushButton('Add Age Group and Show', self)
         self.btn_add_age_group.clicked.connect(lambda: add_age_group(data))
         main_layout.addWidget(self.btn_add_age_group)
-        
+
         self.btn_male_statistics = pq.QPushButton('Show Male Statistics', self)
-        self.btn_male_statistics.clicked.connect(lambda: male_statistics(data))
+        self.btn_male_statistics.clicked.connect(self.open_male_stat_window)
         main_layout.addWidget(self.btn_male_statistics)
-        
+
         self.btn_fill_null_entries = pq.QPushButton('Fill Null Entries', self)
         self.btn_fill_null_entries.clicked.connect(lambda: fill_null_entries(data))
         main_layout.addWidget(self.btn_fill_null_entries)
-        
+
         self.btn_check_title_gender = pq.QPushButton('Check Title Gender', self)
         self.btn_check_title_gender.clicked.connect(lambda: check_title_gender(data))
         main_layout.addWidget(self.btn_check_title_gender)
-        
+
         self.btn_correlation = pq.QPushButton('Show Correlation', self)
-        self.btn_correlation.clicked.connect(lambda: correlation(data))
+        self.btn_correlation.clicked.connect(self.open_correlation)
         main_layout.addWidget(self.btn_correlation)
-        
+
         primary_layout.addLayout(main_layout)
         self.setLayout(primary_layout)
         self.setGeometry(300, 300, 300, 200)
         self.show()
-        
+
     def open_histogram_window(self):
         self.histogram_window = HistogramWindow(data)
         self.histogram_window.show()
+
+    def open_correlation(self, code):
+        code = 1
+        self.stat_window = StatWindow(data, code)
+        self.stat_window.show()
+
+    def open_stat_window(self, code):
+        code = 0
+        self.stat_window = StatWindow(data, code)
+        self.stat_window.show()
+
+    def open_null_stat_window(self, code):
+        code = 2
+        self.stat_window = StatWindow(data, code)
+        self.stat_window.show()
+
+    def open_age_stat_window(self, code):
+        code = 3
+        self.stat_window = StatWindow(data, code)
+        self.stat_window.show()
+
+    def open_male_stat_window(self, code):
+        code = 4
+        self.stat_window = StatWindow(data, code)
+        self.stat_window.show()
 
 if __name__ == '__main__':
     app = pq.QApplication(sys.argv)
