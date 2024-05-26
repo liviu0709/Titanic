@@ -9,33 +9,33 @@ import PyQt5.QtCore as pc
 import PyQt5.QtGui as pg
 
 filepath = ''
-data = pd.read_csv("train.csv") # index_col="PassengerId"
+data = pd.read_csv("train.csv")
 
 male_titles = ['Mr', 'Don', 'Rev', 'Sir', 'Count']
 female_titles = ['Mrs', 'Miss', 'Ms', 'Lady', 'Mlle', 'Countess', 'Dona']
 
 def null_entries(data):
-    print(data.isnull().sum(axis=0))
+    return str(data.isnull().sum(axis=0))
 
 def dupe_indexes(data):
     dupe_index =[]
     for i in range(len(data.duplicated().axes[0])):
         if data.duplicated()[i]:
             dupe_index.append(i)
-    print(dupe_index)
+    return " ".join(dupe_index)
 
-def statistics(data):
-    # se putea folosi si data.info()
-    print("Number of columns:", len(data.axes[1]))
-    print("Number of rows:", len(data.axes[0]))
-    print(data.dtypes)
-    print("Null entries for every column:")
-    null_entries(data)
-    print("Indexes of duplicate lines:")
-    dupe_indexes(data)
+def statistics(data): ## converted
+    result = []
+    result.append(f"Number of columns: {len(data.axes[1])}")
+    result.append(f"Number of rows: {len(data.axes[0])}")
+    result.append(str(data.dtypes))
+    result.append("Null entries for every column:")
+    result.append(null_entries(data))
+    result.append("Indexes of duplicate lines:")
+    result.append(dupe_indexes(data))
+    return "\n".join(result)
 
-
-def survival_percentage(data):
+def survival_percentage(data): ## plot
     percentages = {}
     for col in ['Survived', 'Pclass', 'Sex']:
         perc = ((data[col].value_counts()/data[col].count())*100)
@@ -44,19 +44,18 @@ def survival_percentage(data):
     plt.scatter(percentages.keys(), percentages.values())
     plt.show()
 
-def histograms(data, header):
+def histograms(data, header): ## plot
     plt.hist(data[header])
     plt.xlabel(header)
     plt.ylabel("Number of Passengers")
     plt.show()
 
-def null_statistics(data):
+def null_statistics(data): ## converted
     result = []
     nulls = data.isnull().sum(axis=0)
     for header in nulls.keys():
         if nulls[header] != 0:
             prop = (nulls[header]*100)/len(data[header])
-            # print(header, "column has", nulls[header], "null values, which equals to", prop, "% of values.")
             result.append(f"{header} column has {nulls[header]} null values, which equals to {prop}% of values.")
     for i in [0, 1]:
         result.append("")
@@ -67,14 +66,12 @@ def null_statistics(data):
                 prop = (nulls[header]*100)/len(split_dataset[header])
                 if i:
                     result.append(f"Survivors' {header} column has {nulls[header]}, null values, which equals to {prop}% of values.")
-                    # print("Survivors'", header, "column has", nulls[header], "null values, which equals to", prop, "% of values.")
                 else:
                     result.append(f"Deceased's {header} column has {nulls[header]}, null values, which equals to {prop}% of values.")
-                    # print("Deceased's", header, "column has", nulls[header], "null values, which equals to", prop, "% of values.")
-    print("\n".join(result))
     return "\n".join(result)
 
-def age_statistics(data):
+def age_statistics(data): ## converted
+    result = []
     children_data = data[(data['Age'] < 18)]
     adult_data = data[(data['Age'] > 18)]
     children_perc = len(children_data)/len(data)*100
@@ -87,10 +84,11 @@ def age_statistics(data):
     plt.bar(legend.keys(), legend.values())
     plt.ylabel("Survival Rate")
     plt.show()
-    print("Percentage of children passengers:", children_perc)
-    print("Percentage of adult passengers:", adult_perc)
+    result.append(f"Percentage of children passengers: {children_perc}")
+    result.append(f"Percentage of adult passengers: {adult_perc}")
+    return "\n".join(result)
 
-def add_age_group(data):
+def add_age_group(data): ## plot
     data['AgeGroup'] = data['Age'].apply(lambda x: x if math.isnan(x) else int(max(min((x - 1) // 20, 3), 0)))
     data['AgeGroup'] = data['AgeGroup'].astype('Int64')
     values = {}
@@ -100,7 +98,7 @@ def add_age_group(data):
     plt.show()
     return data
 
-def male_statistics(data):
+def male_statistics(data): ## plot
     male_values = {}
     for i in range(4):
         male_values[i] = len(data[(data['Survived'] == 1) & (data['Sex'] == 'male') & (data['AgeGroup'] == i)])
@@ -109,22 +107,19 @@ def male_statistics(data):
     plt.xlabel("Age group")
     plt.show()
 
-
-def fill_null_entries(data): # doar mediile supravietuitorilor / ale mortilor
+def fill_null_entries(data): ## in place
     for i in [0, 1]:
         data.loc[(data['Survived'] == i) & (data['Age'].isnull()), 'Age'] = data[data['Survived'] == i]['Age'].mean()
         for label in ['Cabin', 'Embarked']:
             data.loc[(data['Survived'] == i) & (data[label].isnull()), label] = data[(data['Survived'] == i)][label].value_counts().keys()[0]
     return data
 
-
-def check_title_gender(data):
+def check_title_gender(data): ## plot
     titles = {}
     for name in data['Name']:
         temp = re.findall(" [a-zA-Z]+\. ", name)
         if temp[0].strip(' .') not in titles.keys() and temp[0].strip(' .') in male_titles:
             temp_data = data[(data['Sex'] == 'male')]
-            # print("temp stip:", temp[0].strip(' '))
             titles[temp[0].strip(' ')] = temp_data['Name'].str.contains(temp[0]).sum()
         else:
             if temp[0].strip(' .') not in titles.keys() and temp[0].strip(' .') in female_titles:
@@ -138,7 +133,7 @@ def check_title_gender(data):
 # ----------------------------
 # it's conspiracy theory time!
 # ----------------------------
-def correlation(data):
+def correlation(data): ## converted
     result = []
     split_data = data.copy()
     for header in split_data.axes[1]:
@@ -177,9 +172,6 @@ class StatWindow(pq.QWidget):
             case 3:
                 self.setWindowTitle('Age Statistics')
                 text_label.setPlainText(age_statistics(self.data))
-            case 4:
-                self.setWindowTitle('Male Statistics')
-                text_label.setPlainText(male_statistics(self.data))
 
         text_label.setReadOnly(True)
         main_layout.addWidget(text_label)
@@ -250,7 +242,7 @@ class TitanicApp(pq.QWidget):
         main_layout.addWidget(self.btn_add_age_group)
 
         self.btn_male_statistics = pq.QPushButton('Show Male Statistics', self)
-        self.btn_male_statistics.clicked.connect(self.open_male_stat_window)
+        self.btn_male_statistics.clicked.connect(lambda: male_statistics(data))
         main_layout.addWidget(self.btn_male_statistics)
 
         self.btn_fill_null_entries = pq.QPushButton('Fill Null Entries', self)
@@ -291,11 +283,6 @@ class TitanicApp(pq.QWidget):
 
     def open_age_stat_window(self, code):
         code = 3
-        self.stat_window = StatWindow(data, code)
-        self.stat_window.show()
-
-    def open_male_stat_window(self, code):
-        code = 4
         self.stat_window = StatWindow(data, code)
         self.stat_window.show()
 
