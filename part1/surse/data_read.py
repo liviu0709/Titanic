@@ -31,7 +31,7 @@ def statistics(data): ## converted
     result.append(dupe_indexes(data))
     return "\n".join(result)
 
-def survival_percentage(data): ## plot
+def survival_percentage(data, pltShow=False): ## plot
     percentages = {}
     for col in ['Survived', 'Pclass', 'Sex']:
         perc = ((data[col].value_counts()/data[col].count())*100)
@@ -39,13 +39,13 @@ def survival_percentage(data): ## plot
             percentages[col+': '+str(value)] = perc[value]
     plt.bar(percentages.keys(), percentages.values())
     plt.ylabel("Percentage")
-    plt.show(block=False)
+    plt.show(block=pltShow)
 
-def histograms(data, header): ## plot
+def histograms(data, header, pltShow=False): ## plot
     plt.hist(data[header])
     plt.xlabel(header)
     plt.ylabel("Number of Passengers")
-    plt.show(block=False)
+    plt.show(block=pltShow)
 
 def null_statistics(data): ## converted
     result = []
@@ -118,7 +118,7 @@ def fill_null_entries(data): ## in place
         data.loc[(data['Survived'] == i) & (data['Age'].isnull()), 'Age'] = data[data['Survived'] == i]['Age'].mean()
         for label in ['Cabin', 'Embarked']:
             data.loc[(data['Survived'] == i) & (data[label].isnull()), label] = data[(data['Survived'] == i)][label].value_counts().keys()[0]
-    data.to_csv("./../date/filled_null.csv", index=False)
+    # data.to_csv("./../date/filled_null.csv", index=False)
     return data
 
 def check_title_gender(data): ## plot
@@ -140,7 +140,7 @@ def check_title_gender(data): ## plot
 # ----------------------------
 # it's conspiracy theory time!
 # ----------------------------
-def correlation(data): ## converted
+def correlation(data, pltShow=False): ## converted
     result = []
     split_data = data.copy()
     for header in split_data.axes[1]:
@@ -149,5 +149,5 @@ def correlation(data): ## converted
     result.append(str(split_data.corr()))
     result.append("Putem trage concluzia ca starea de celibat pe vas nu a influențat considerabil rata de supraviețuire.")
     sb.catplot(data.head(100), x='Pclass', y='Fare', col='Survived', kind='swarm', size=2)
-    plt.show(block=False)
+    plt.show(block=pltShow)
     return "\n".join(result)
