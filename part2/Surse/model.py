@@ -20,7 +20,7 @@ import Task1
 # Adds parent directory to be able to import from it
 import sys
 sys.path.append("../../")
-import data_read
+import part1.surse.data_read
 
 import warnings
 # Warnings are never important !
@@ -81,7 +81,7 @@ def buildModel(feature_cols, cols_normalise):
     data = pd.read_csv("../../train.csv")
 
     # Using Part 1 -> Task 8
-    data_read.fill_null_entries(data)
+    part1.surse.data_read.fill_null_entries(data)
 
     # Convert sex to numeric
     # male -> 0
